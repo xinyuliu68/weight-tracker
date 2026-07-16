@@ -2,7 +2,7 @@
    sw.js — Service Worker 离线缓存
    ========================================== */
 
-const CACHE_NAME = 'weight-tracker-v2';
+const CACHE_NAME = 'weight-tracker-v3';
 
 const STATIC_FILES = [
   './',

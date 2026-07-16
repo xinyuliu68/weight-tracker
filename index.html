@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#FAF9F6">
+  <title>体重记录</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+<!-- ========== 应用容器 ========== -->
+<div id="app" class="app-container">
+
+  <!-- ===== 欢迎引导页 ===== -->
+  <div id="welcome-page" class="page welcome-page hidden">
+    <div class="welcome-content">
+      <div class="welcome-icon">⚖️</div>
+      <h1 class="welcome-title">欢迎使用体重记录</h1>
+      <p class="welcome-desc">记录每一天的变化，见证更好的自己</p>
+      <button id="welcome-add-btn" class="btn btn-primary btn-large">添加第一个人物</button>
+    </div>
+  </div>
+
+  <!-- ===== 记录页 ===== -->
+  <div id="record-page" class="page record-page">
+    <!-- 顶部栏 -->
+    <div class="top-bar">
+      <div class="person-selector" id="person-selector">
+        <div class="person-avatar" id="current-avatar">欣</div>
+        <span class="person-name" id="current-name">欣宇</span>
+        <span class="person-arrow">▾</span>
+      </div>
+      <div class="top-bar-spacer"></div>
+    </div>
+
+    <!-- 可滚动内容 -->
+    <div class="page-scroll" id="record-scroll">
+      <!-- 体重大卡 -->
+      <div class="weight-card card">
+        <div class="weight-card-label">最新体重（晨间）</div>
+        <div class="weight-card-value" id="latest-weight">--</div>
+        <div class="weight-card-date" id="latest-date">--</div>
+        <div class="weight-card-diff" id="latest-diff"></div>
+      </div>
+
+      <!-- BMI 卡片 -->
+      <div class="bmi-card card hidden" id="bmi-card">
+        <div class="card-title">BMI 指数</div>
+        <div class="bmi-value-row">
+          <span class="bmi-number" id="bmi-number">--</span>
+          <span class="bmi-status" id="bmi-status">--</span>
+        </div>
+        <div class="bmi-bar" id="bmi-bar">
+          <div class="bmi-bar-segment bmi-segment-underweight">偏瘦</div>
+          <div class="bmi-bar-segment bmi-segment-normal">正常</div>
+          <div class="bmi-bar-segment bmi-segment-overweight">偏重</div>
+          <div class="bmi-bar-segment bmi-segment-obese">肥胖</div>
+          <div class="bmi-bar-dot" id="bmi-dot"></div>
+        </div>
+      </div>
+
+      <!-- 目标进度卡片 -->
+      <div class="goal-card card hidden" id="goal-card">
+        <div class="card-title">目标进度</div>
+        <div class="goal-info" id="goal-info">目标 -- kg，当前 -- kg</div>
+        <div class="goal-bar">
+          <div class="goal-bar-fill" id="goal-bar-fill"></div>
+        </div>
+        <div class="goal-percent" id="goal-percent">--</div>
+      </div>
+
+      <!-- 今日状态 -->
+      <div class="today-status" id="today-status">
+        今日还未记录
+      </div>
+    </div>
+
+    <!-- 底部记录按钮 -->
+    <div class="record-btn-wrapper">
+      <button id="record-btn" class="btn btn-record">+ 记录体重</button>
+    </div>
+  </div>
+
+  <!-- ===== 趋势页 ===== -->
+  <div id="trend-page" class="page trend-page hidden">
+    <div class="top-bar">
+      <div class="person-selector" id="trend-person-selector">
+        <div class="person-avatar" id="trend-avatar">欣</div>
+        <span class="person-name" id="trend-name">欣宇</span>
+        <span class="person-arrow">▾</span>
+      </div>
+      <div class="top-bar-spacer"></div>
+    </div>
+
+    <div class="page-scroll" id="trend-scroll">
+      <!-- 时间范围切换 -->
+      <div class="range-tabs" id="range-tabs">
+        <button class="range-tab active" data-range="7">7天</button>
+        <button class="range-tab" data-range="30">30天</button>
+        <button class="range-tab" data-range="90">90天</button>
+        <button class="range-tab" data-range="all">全部</button>
+      </div>
+
+      <!-- 折线图容器 -->
+      <div class="chart-container card" id="chart-container">
+        <canvas id="weight-chart"></canvas>
+        <div class="chart-empty hidden" id="chart-empty">记录 2 天以上即可查看趋势</div>
+      </div>
+
+      <!-- 统计卡片 2x2 -->
+      <div class="stats-grid">
+        <div class="stat-card card">
+          <div class="stat-label">最高体重</div>
+          <div class="stat-value" id="stat-max">--</div>
+        </div>
+        <div class="stat-card card">
+          <div class="stat-label">最低体重</div>
+          <div class="stat-value" id="stat-min">--</div>
+        </div>
+        <div class="stat-card card">
+          <div class="stat-label">平均体重</div>
+          <div class="stat-value" id="stat-avg">--</div>
+        </div>
+        <div class="stat-card card">
+          <div class="stat-label">总变化</div>
+          <div class="stat-value" id="stat-change">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 日历页 ===== -->
+  <div id="calendar-page" class="page calendar-page hidden">
+    <div class="top-bar calendar-top-bar">
+      <span class="calendar-top-title">日历</span>
+      <div class="top-bar-spacer"></div>
+    </div>
+
+    <div class="page-scroll" id="calendar-scroll">
+      <!-- 人物图例 -->
+      <div class="calendar-legend" id="calendar-legend"></div>
+
+      <!-- 月份导航 -->
+      <div class="month-nav">
+        <button class="month-nav-arrow" id="month-prev">◀</button>
+        <span class="month-nav-title" id="month-title">2026年7月</span>
+        <button class="month-nav-arrow" id="month-next">▶</button>
+      </div>
+
+      <!-- 日历网格 -->
+      <div class="calendar-grid" id="calendar-grid">
+        <div class="calendar-weekdays">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+        </div>
+        <div class="calendar-days" id="calendar-days"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 我的页 ===== -->
+  <div id="me-page" class="page me-page hidden">
+    <div class="page-scroll" id="me-scroll">
+      <!-- 人物管理 -->
+      <div class="section-title">人物管理</div>
+      <div class="card person-list-card">
+        <div class="person-list" id="person-list"></div>
+        <button id="add-person-btn" class="btn btn-add-person">+ 添加人物</button>
+      </div>
+
+      <!-- 数据管理 -->
+      <div class="section-title">数据管理</div>
+      <div class="card data-card">
+        <button class="btn btn-data" id="export-btn">导出数据</button>
+        <button class="btn btn-data" id="import-btn">导入数据</button>
+        <input type="file" id="import-file" accept=".json" class="hidden">
+        <button class="btn btn-data btn-danger" id="clear-btn">清除所有数据</button>
+      </div>
+
+      <!-- 关于 -->
+      <div class="section-title">关于</div>
+      <div class="card about-card">
+        <div class="about-row">
+          <span>应用名称</span>
+          <span class="about-value">体重记录</span>
+        </div>
+        <div class="about-row">
+          <span>版本</span>
+          <span class="about-value">2.0.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 底部 Tab 导航 ===== -->
+  <nav class="tab-bar hidden" id="tab-bar">
+    <button class="tab-item active" data-tab="record">
+      <span class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </span>
+      <span class="tab-text">记录</span>
+    </button>
+    <button class="tab-item" data-tab="trend">
+      <span class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </span>
+      <span class="tab-text">趋势</span>
+    </button>
+    <button class="tab-item" data-tab="calendar">
+      <span class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </span>
+      <span class="tab-text">日历</span>
+    </button>
+    <button class="tab-item" data-tab="me">
+      <span class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </span>
+      <span class="tab-text">我的</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ========== 遮罩层 ========== -->
+<div class="overlay hidden" id="overlay"></div>
+
+<!-- ===== 记录体重弹窗 ===== -->
+<div class="sheet hidden" id="record-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <button class="sheet-cancel" id="record-cancel">取消</button>
+    <span class="sheet-title">记录体重</span>
+    <button class="sheet-save" id="record-save">保存</button>
+  </div>
+  <div class="sheet-body">
+    <!-- 早晚选择 -->
+    <div class="type-toggle-row">
+      <label class="record-label">时段</label>
+      <div class="type-toggle" id="type-toggle">
+        <button class="type-option active" data-type="morning">☀️ 早晨</button>
+        <button class="type-option" data-type="evening">🌙 晚上</button>
+      </div>
+    </div>
+
+    <!-- 日期选择 -->
+    <div class="record-field-row">
+      <label class="record-label">日期</label>
+      <input type="date" id="record-date" class="record-date-input">
+    </div>
+
+    <div class="record-exists-tip hidden" id="record-exists-tip">该时段已有记录，保存将覆盖</div>
+
+    <div class="weight-input-row">
+      <input type="number" id="weight-input" class="weight-input" placeholder="0.0" step="0.1" inputmode="decimal">
+      <span class="weight-unit" id="weight-unit">kg</span>
+    </div>
+    <div class="weight-convert" id="weight-convert"></div>
+
+    <div class="record-extra">
+      <div class="record-field">
+        <label class="record-label">时间</label>
+        <input type="time" id="record-time" class="record-time">
+      </div>
+      <div class="record-field">
+        <label class="record-label">备注</label>
+        <input type="text" id="record-note" class="record-note" placeholder="空腹、运动后…">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 添加/编辑人物弹窗 ===== -->
+<div class="sheet hidden" id="person-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <button class="sheet-cancel" id="person-cancel">取消</button>
+    <span class="sheet-title" id="person-sheet-title">添加人物</span>
+    <button class="sheet-save" id="person-save">保存</button>
+  </div>
+  <div class="sheet-body">
+    <div class="form-group">
+      <label class="form-label">名字 <span class="required">*</span></label>
+      <input type="text" id="person-name-input" class="form-input" placeholder="你的名字" maxlength="10">
+    </div>
+    <div class="form-group">
+      <label class="form-label">身高 (cm)</label>
+      <input type="number" id="person-height-input" class="form-input" placeholder="选填" step="1" inputmode="numeric">
+    </div>
+    <div class="form-group">
+      <label class="form-label">目标体重 (kg)</label>
+      <input type="number" id="person-target-input" class="form-input" placeholder="选填" step="0.1" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label class="form-label">默认单位</label>
+      <div class="unit-toggle">
+        <button class="unit-option active" data-unit="kg">kg</button>
+        <button class="unit-option" data-unit="斤">斤</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">主题色</label>
+      <div class="color-picker" id="color-picker"></div>
+    </div>
+    <button class="btn btn-delete-person hidden" id="delete-person-btn">删除人物</button>
+  </div>
+</div>
+
+<!-- ===== 人物选择浮层 ===== -->
+<div class="sheet hidden" id="person-select-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">切换人物</span>
+    <button class="sheet-cancel" id="select-cancel">完成</button>
+  </div>
+  <div class="sheet-body">
+    <div class="person-select-list" id="person-select-list"></div>
+  </div>
+</div>
+
+<!-- ===== 日期详情浮层 ===== -->
+<div class="sheet hidden" id="date-detail-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title" id="detail-date-title"></span>
+    <div class="detail-header-actions">
+      <button class="detail-add-btn" id="detail-add-record">+ 新增记录</button>
+      <button class="sheet-cancel" id="detail-close">关闭</button>
+    </div>
+  </div>
+  <div class="sheet-body" id="detail-records"></div>
+</div>
+
+<!-- ===== 确认弹窗 ===== -->
+<div class="dialog-overlay hidden" id="confirm-dialog">
+  <div class="dialog">
+    <div class="dialog-message" id="confirm-message"></div>
+    <div class="dialog-actions">
+      <button class="dialog-btn dialog-cancel" id="confirm-cancel">取消</button>
+      <button class="dialog-btn dialog-confirm" id="confirm-ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast 提示 ===== -->
+<div class="toast hidden" id="toast"></div>
+
+<!-- JS 文件 -->
+<script src="js/utils.js"></script>
+<script src="js/store.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

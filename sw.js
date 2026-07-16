@@ -2,7 +2,7 @@
    sw.js — Service Worker 离线缓存
    ========================================== */
 
-const CACHE_NAME = 'weight-tracker-v3';
+const CACHE_NAME = 'weight-tracker-v4';
 
 const STATIC_FILES = [
   './',
@@ -14,6 +14,9 @@ const STATIC_FILES = [
   'js/calendar.js',
   'js/app.js',
   'manifest.json',
+  'icons/icon-72-v3.png',
+  'icons/icon-192-v3.png',
+  'icons/icon-512-v3.png',
 ];
 
 // 安装
